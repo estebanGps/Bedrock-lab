@@ -24,7 +24,7 @@ while (!string.IsNullOrWhiteSpace(userInput))
         break;
     }
 
-    Console.WriteLine("AI Response:" + aiResponse.Text);
+    Console.WriteLine("AI Response: " + aiResponse.Text);
     userInput = GetUserInput();
 }
 
