@@ -1,64 +1,18 @@
 ﻿using System.Text.Json;
-using Amazon.BedrockRuntime.Model;
 using BedrockLab.Models;
 
 namespace BedrockLab.Tools;
 
 public class AssetsTool
 {
-    public static ToolSpecification GetAllAssetsToolSpec
-    {
-        get
-        {
-            return new ToolSpecification
-            {
-                Name = "get_all_assets",
-                Description = "Retrieve a list of all the assets in the application in JSON format.",
-                InputSchema = new ToolInputSchema
-                {
-                    Json = Amazon.Runtime.Documents.Document.FromObject(new
-                    {
-                        type = "object",
-                    })
-                }
-            };
-        }
-    }
-
-    public static ToolSpecification GetAssetByIdToolSpec
-    {
-        get
-        {
-            return new ToolSpecification
-            {
-                Name = "get_asset_by_id",
-                Description = "Retrieve a specific asset by its ID in JSON format.",
-                InputSchema = new ToolInputSchema
-                {
-                    Json = Amazon.Runtime.Documents.Document.FromObject(new
-                    {
-                        type = "object",
-                        properties = new
-                        {
-                            asset_id = new
-                            {
-                                type = "integer",
-                                description = "The unique identifier of the asset."
-                            }
-                        },
-                        required = new[] { "asset_id" }
-                    })
-                }
-            };
-        }
-    }
-
+    [BedrockTool("get_all_assets", "Retrieve a list of all the assets in the application in JSON format.")]
     public static string GetAllAssets()
     {
         return JsonSerializer.Serialize(_allAssets);
     }
 
-    public static string GetAssetById(int assetId)
+    [BedrockTool("get_asset_by_id", "Retrieve a specific asset by its ID. The result is in JSON format.")]
+    public static string GetAssetById([BedrockToolParam("asset_id", "The unique identifier of the asset.")] int assetId)
     {
         Asset? asset = _allAssets.Find(a => a.Id == assetId);
         if (asset != null)

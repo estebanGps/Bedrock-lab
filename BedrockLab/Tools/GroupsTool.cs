@@ -1,29 +1,10 @@
-using Amazon.BedrockRuntime.Model;
 using BedrockLab.Models;
 
 namespace BedrockLab.Tools;
 
 public class GroupsTool
 {
-    public static ToolSpecification GetAllGroupsToolSpec
-    {
-        get
-        {
-            return new ToolSpecification
-            {
-                Name = "get_all_groups",
-                Description = "Retrieve a list of all the groups in the application in JSON format.",
-                InputSchema = new ToolInputSchema
-                {
-                    Json = Amazon.Runtime.Documents.Document.FromObject(new
-                    {
-                        type = "object",
-                    })
-                }
-            };
-        }
-    }
-
+    [BedrockTool("get_all_groups", "Retrieve a list of all the groups in the application in JSON format.")]
     public static string GetAllGroups()
     {
         return System.Text.Json.JsonSerializer.Serialize(_allGroups);
