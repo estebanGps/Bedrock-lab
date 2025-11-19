@@ -5,21 +5,31 @@ using BedrockLab;
 using BedrockLab.Models;
 using BedrockLab.Services;
 
-BedrockClient bedrockClient = new(
-    new AmazonBedrockRuntimeClient(new AmazonBedrockRuntimeConfig
-    {
-        RegionEndpoint = RegionEndpoint.USWest2
-    }),
-new ToolExecutor());
+const string MODEL_ID = "openai.gpt-oss-20b-1:0";
 
-List<Message> messages = [ new Message(){ Role = ConversationRole.User, Content = [new() { Text = "How many assets do I have?"} ]}];
+BedrockClient bedrockClient = new(new AmazonBedrockRuntimeClient(new AmazonBedrockRuntimeConfig { RegionEndpoint = RegionEndpoint.USWest2 }));
 
-AiResponse aiResponse = await bedrockClient.CallModel("openai.gpt-oss-20b-1:0", SystemPrompts.SystemPrompt, messages);
+List<Message> messages = [];
 
-if (!string.IsNullOrEmpty(aiResponse.Error))
+string userInput = GetUserInput();
+while (!string.IsNullOrWhiteSpace(userInput))
 {
-    Console.Error.WriteLine(aiResponse.Error);
-    return;
+    messages.Add(new Message() { Role = ConversationRole.User, Content = [new() { Text = userInput }] });
+
+    AiResponse aiResponse = await bedrockClient.CallModel(MODEL_ID, SystemPrompts.SystemPrompt, messages);
+
+    if (!string.IsNullOrEmpty(aiResponse.Error))
+    {
+        Console.Error.WriteLine(aiResponse.Error);
+        break;
+    }
+
+    Console.WriteLine("AI Response:" + aiResponse.Text);
+    userInput = GetUserInput();
 }
 
-Console.WriteLine("AI Response:" + aiResponse.Text);
+static string GetUserInput()
+{
+    Console.WriteLine("Enter your message:");
+    return Console.ReadLine() ?? string.Empty;
+}

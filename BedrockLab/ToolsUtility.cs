@@ -7,7 +7,11 @@ namespace BedrockLab
     {
         internal static List<Tool> GetAllTools()
         {
-            return [new Tool() { ToolSpec = AssetsTool.GetAllAssetsToolSpec }];
+            return [
+                new Tool() { ToolSpec = AssetsTool.GetAllAssetsToolSpec },
+                new Tool() { ToolSpec = AssetsTool.GetAssetByIdToolSpec },
+                new Tool() { ToolSpec = GroupsTool.GetAllGroupsToolSpec }
+            ];
         }
     }
 }

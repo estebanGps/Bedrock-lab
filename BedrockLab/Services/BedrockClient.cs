@@ -9,12 +9,10 @@ namespace BedrockLab.Services;
 public class BedrockClient
 {
     private readonly AmazonBedrockRuntimeClient _bedrockRuntimeClient;
-    private readonly ToolExecutor _toolExecutor;
 
-    public BedrockClient(AmazonBedrockRuntimeClient bedrockRuntimeClient, ToolExecutor toolExecutor)
+    public BedrockClient(AmazonBedrockRuntimeClient bedrockRuntimeClient)
     {
         _bedrockRuntimeClient = bedrockRuntimeClient;
-        _toolExecutor = toolExecutor;
     }
 
     public async Task<AiResponse> CallModel(string modelId, string systemPrompt, List<Message> messages)
@@ -72,7 +70,7 @@ public class BedrockClient
         };
     }
 
-    private async Task<Message> ExecuteTool(Message message)
+    private static async Task<Message> ExecuteTool(Message message)
     {
         List<ContentBlock> toolResults = [];
         foreach (ContentBlock contentBlock in message.Content)
@@ -80,7 +78,7 @@ public class BedrockClient
             if (contentBlock.ToolUse is null)
                 continue;
 
-            Document toolResult = _toolExecutor.ExecuteTool(contentBlock.ToolUse.Name, contentBlock.ToolUse.Input);
+            Document toolResult = ToolExecutor.ExecuteTool(contentBlock.ToolUse.Name, contentBlock.ToolUse.Input);
 
             toolResults.Add(new ContentBlock
             {
