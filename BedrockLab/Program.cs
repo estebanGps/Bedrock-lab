@@ -5,10 +5,12 @@ using BedrockLab;
 using BedrockLab.Models;
 using BedrockLab.Services;
 
-BedrockClient bedrockClient = new(new AmazonBedrockRuntimeClient(new AmazonBedrockRuntimeConfig
-{
-    RegionEndpoint = RegionEndpoint.USWest2
-}));
+BedrockClient bedrockClient = new(
+    new AmazonBedrockRuntimeClient(new AmazonBedrockRuntimeConfig
+    {
+        RegionEndpoint = RegionEndpoint.USWest2
+    }),
+new ToolExecutor());
 
 List<Message> messages = [ new Message(){ Role = ConversationRole.User, Content = [new() { Text = "How many assets do I have?"} ]}];
 

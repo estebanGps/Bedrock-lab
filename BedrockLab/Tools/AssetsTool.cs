@@ -4,7 +4,7 @@ using BedrockLab.Models;
 
 namespace BedrockLab.Tools
 {
-    internal class AssetsTool
+    public class AssetsTool
     {
         public static ToolSpecification GetAllAssetsToolSpec { get
             {

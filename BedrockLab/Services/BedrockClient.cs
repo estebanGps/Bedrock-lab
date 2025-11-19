@@ -1,3 +1,4 @@
+using System.Text;
 using Amazon.BedrockRuntime;
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime.Documents;
@@ -8,10 +9,12 @@ namespace BedrockLab.Services;
 public class BedrockClient
 {
     private readonly AmazonBedrockRuntimeClient _bedrockRuntimeClient;
+    private readonly ToolExecutor _toolExecutor;
 
-    public BedrockClient(AmazonBedrockRuntimeClient bedrockRuntimeClient)
+    public BedrockClient(AmazonBedrockRuntimeClient bedrockRuntimeClient, ToolExecutor toolExecutor)
     {
         _bedrockRuntimeClient = bedrockRuntimeClient;
+        _toolExecutor = toolExecutor;
     }
 
     public async Task<AiResponse> CallModel(string modelId, string systemPrompt, List<Message> messages)
@@ -76,19 +79,34 @@ public class BedrockClient
         {
             if (contentBlock.ToolUse is null)
                 continue;
-            string toolName = contentBlock.ToolUse.Name;
-            Dictionary<string, object> toolInput = ParseToolInput(contentBlock.ToolUse.Input);
+
+            Document toolResult = _toolExecutor.ExecuteTool(contentBlock.ToolUse.Name, contentBlock.ToolUse.Input);
+
+            toolResults.Add(new ContentBlock
+            {
+                ToolResult = new ToolResultBlock
+                {
+                    ToolUseId = contentBlock.ToolUse.ToolUseId,
+                    Content = [ new ToolResultContentBlock { Json = toolResult } ]
+                }
+            });
         }
         return new Message() { Role = ConversationRole.User, Content = toolResults };
     }
 
-    private static Dictionary<string, object> ParseToolInput(Document input)
+    private static string ExtractTextFromMessages(List<Message> messagesFromModel)
     {
-        throw new NotImplementedException();
-    }
-
-    private string ExtractTextFromMessages(List<Message> messagesFromModel)
-    {
-        throw new NotImplementedException();
+        StringBuilder result = new();
+        foreach (Message message in messagesFromModel)
+        {
+            foreach (ContentBlock contentBlock in message.Content)
+            {
+                if (contentBlock.Text is not null)
+                {
+                    result.AppendLine(contentBlock.Text);
+                }
+            }
+        }
+        return result.ToString();
     }
 }
