@@ -78,7 +78,7 @@ public class BedrockClient
             if (contentBlock.ToolUse is null)
                 continue;
 
-            Document toolResult = ToolExecutor.ExecuteTool(contentBlock.ToolUse.Name, contentBlock.ToolUse.Input);
+            Document toolResult = await ToolExecutor.ExecuteTool(contentBlock.ToolUse.Name, contentBlock.ToolUse.Input);
 
             toolResults.Add(new ContentBlock
             {

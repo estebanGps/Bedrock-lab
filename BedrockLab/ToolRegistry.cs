@@ -23,7 +23,7 @@ namespace BedrockLab
         private static void Scan()
         {
             MethodInfo[] methods = Assembly.GetExecutingAssembly().GetTypes()
-                .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
+                .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance))
                 .Where(m => m.GetCustomAttributes(typeof(BedrockToolAttribute), false).Length > 0)
                 .ToArray();
             foreach (MethodInfo method in methods)
