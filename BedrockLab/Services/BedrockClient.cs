@@ -29,7 +29,7 @@ public class BedrockClient
                 Messages = messages,
                 System = [new SystemContentBlock() { Text = systemPrompt }],
                 InferenceConfig = new InferenceConfiguration { Temperature = 0.3F, MaxTokens = 2000 },
-                ToolConfig = new ToolConfiguration { Tools = ToolsUtility.GetAllTools() }
+                ToolConfig = new ToolConfiguration { Tools = ToolRegistry.GetAllTools().ToList() }
             };
             try
             {

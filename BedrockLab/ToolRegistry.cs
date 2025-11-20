@@ -1,23 +1,27 @@
-﻿using System.Reflection;
+﻿using System.Collections.Immutable;
+using System.Reflection;
 using Amazon.BedrockRuntime.Model;
 using Amazon.Runtime.Documents;
+using BedrockLab.Models;
 using BedrockLab.Tools;
 
 namespace BedrockLab
 {
-    internal class ToolsUtility
+    internal class ToolRegistry
     {
-        private static List<Tool>? _allTools;
+        private static readonly Dictionary<string, BedrockTool> _allTools = [];
 
-        internal static List<Tool> GetAllTools()
+        static ToolRegistry()
         {
-            _allTools ??= Scan();
-            return _allTools;
+            Scan();
         }
 
-        private static List<Tool> Scan()
+        internal static IImmutableList<Tool> GetAllTools() => _allTools.Values.Select(bt => bt.Tool).ToImmutableList();
+
+        internal static ILookup<string, BedrockTool> GetAllBedrockTools() => _allTools.ToLookup(kvp => kvp.Key, kvp => kvp.Value);
+
+        private static void Scan()
         {
-            List<Tool> result = [];
             MethodInfo[] methods = Assembly.GetExecutingAssembly().GetTypes()
                 .SelectMany(t => t.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.NonPublic))
                 .Where(m => m.GetCustomAttributes(typeof(BedrockToolAttribute), false).Length > 0)
@@ -25,15 +29,18 @@ namespace BedrockLab
             foreach (MethodInfo method in methods)
             {
                 Tool tool = CreateTool(method);
-                result.Add(tool);
+                if (_allTools.ContainsKey(tool.ToolSpec.Name))
+                {
+                    throw new Exception($"Duplicate tool name detected: {tool.ToolSpec.Name}");
+                }
+                BedrockTool bedrockTool = new() { MethodInfo = method, Tool = tool };
+                _allTools.Add(tool.ToolSpec.Name, bedrockTool);
             }
-            return result;
         }
 
         private static Tool CreateTool(MethodInfo method)
         {
             BedrockToolAttribute attribute = (BedrockToolAttribute)method.GetCustomAttribute(typeof(BedrockToolAttribute))!;
-
             Document properties = new();
             List<string> required = [];
             foreach (ParameterInfo param in method.GetParameters())
